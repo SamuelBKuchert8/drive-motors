@@ -1,6 +1,13 @@
-# Drive Motors
+<p align="center">
+  <img src="assets/logo.png" alt="Drive Motors" width="320">
+</p>
 
-Site de uma concessionária de veículos, feito com HTML, CSS e JavaScript.
+<h1 align="center">Drive Motors</h1>
+
+<p align="center">
+  Site de uma concessionária de veículos, feito com HTML, CSS e JavaScript.<br>
+  <a href="https://samuelbkuchert8.github.io/drive-motors/"><strong>Acessar o site »</strong></a>
+</p>
 
 ## Integrantes
 
