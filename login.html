@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Drive Motors</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="pagina-form">
+        <a class="voltar" href="index.html">← Voltar para o site</a>
+
+        <!-- LOGIN -->
+        <div id="boxLogin">
+            <h1>Entrar</h1>
+            <form id="formLogin">
+                <label>E-mail</label>
+                <input type="email" id="loginEmail" required>
+
+                <label>Senha</label>
+                <input type="password" id="loginSenha" required>
+
+                <button class="btn" type="submit">ENTRAR</button>
+                <p id="msgLogin" class="msg"></p>
+            </form>
+            <p class="trocar">Não tem conta? <button onclick="trocar('cadastro')">Criar conta</button></p>
+        </div>
+
+        <!-- CADASTRO -->
+        <div id="boxCadastro" class="escondido">
+            <h1>Criar conta</h1>
+            <form id="formCadastro">
+                <label>Nome</label>
+                <input type="text" id="cadNome" required>
+
+                <label>E-mail</label>
+                <input type="email" id="cadEmail" required>
+
+                <label>Senha (mínimo 6 caracteres)</label>
+                <input type="password" id="cadSenha" required>
+
+                <label>Confirmar senha</label>
+                <input type="password" id="cadConfirmar" required>
+
+                <button class="btn" type="submit">CRIAR CONTA</button>
+                <p id="msgCadastro" class="msg"></p>
+            </form>
+            <p class="trocar">Já tem conta? <button onclick="trocar('login')">Entrar</button></p>
+        </div>
+    </div>
+
+    <script>
+        // Se já estiver logado, vai direto para o site
+        if (localStorage.getItem("usuarioLogado")) {
+            window.location.href = "index.html";
+        }
+
+        // Lê a lista de usuários salva no navegador
+        // (o administrador padrão é criado se ainda não existir)
+        function pegarUsuarios() {
+            let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+            let temAdmin = usuarios.some(function (u) { return u.email === "adm@gmail.com"; });
+            if (!temAdmin) {
+                usuarios.push({ id: 1, nome: "Administrador", email: "adm@gmail.com", senha: "adm123", tipo: "admin" });
+                localStorage.setItem("usuarios", JSON.stringify(usuarios));
+            }
+            return usuarios;
+        }
+
+        // Troca entre as telas de login e cadastro
+        function trocar(tela) {
+            document.getElementById("boxLogin").classList.toggle("escondido", tela !== "login");
+            document.getElementById("boxCadastro").classList.toggle("escondido", tela !== "cadastro");
+        }
+
+        // ===== Cadastro =====
+        document.getElementById("formCadastro").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            let nome = document.getElementById("cadNome").value.trim();
+            let email = document.getElementById("cadEmail").value.trim().toLowerCase();
+            let senha = document.getElementById("cadSenha").value;
+            let confirmar = document.getElementById("cadConfirmar").value;
+            let msg = document.getElementById("msgCadastro");
+
+            if (senha.length < 6) {
+                msg.textContent = "A senha precisa ter pelo menos 6 caracteres.";
+                msg.className = "msg erro";
+                return;
+            }
+            if (senha !== confirmar) {
+                msg.textContent = "As senhas não são iguais.";
+                msg.className = "msg erro";
+                return;
+            }
+
+            let usuarios = pegarUsuarios();
+
+            if (usuarios.some(function (u) { return u.email === email; })) {
+                msg.textContent = "Esse e-mail já está cadastrado.";
+                msg.className = "msg erro";
+                return;
+            }
+
+            usuarios.push({ id: Date.now(), nome: nome, email: email, senha: senha, tipo: "cliente" });
+            localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+            msg.textContent = "Conta criada com sucesso! Agora é só entrar.";
+            msg.className = "msg ok";
+            this.reset();
+            setTimeout(function () { trocar("login"); }, 1000);
+        });
+
+        // ===== Login =====
+        document.getElementById("formLogin").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            let email = document.getElementById("loginEmail").value.trim().toLowerCase();
+            let senha = document.getElementById("loginSenha").value;
+            let msg = document.getElementById("msgLogin");
+
+            let usuario = pegarUsuarios().find(function (u) {
+                return u.email === email && u.senha === senha;
+            });
+
+            if (!usuario) {
+                msg.textContent = "E-mail ou senha incorretos.";
+                msg.className = "msg erro";
+                return;
+            }
+
+            localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+            window.location.href = "index.html";
+        });
+    </script>
+
+</body>
+</html>

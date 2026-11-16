@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trabalhe conosco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #101216;
+    --card: #171a20;
+    --line: #2b3038;
+    --text: #f2f3f5;
+    --muted: #8d95a1;
+    --red: #e11d2e;
+    --red-dark: #b3121f;
+    --ok: #4ade80;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: "Archivo", Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+}
+.wrap {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 56px 20px 80px;
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 48px;
+    align-items: start;
+}
+.intro h1 {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+}
+.intro h1 em { font-style: normal; color: var(--red); }
+.intro p { color: var(--muted); max-width: 38ch; margin-bottom: 28px; }
+.reqs {
+    list-style: none;
+    border-left: 3px solid var(--red);
+    padding-left: 18px;
+    display: grid;
+    gap: 10px;
+    font-size: 14px;
+}
+.reqs strong { display: block; font-size: 13px; color: var(--text); margin-bottom: 4px; }
+.reqs li { color: var(--muted); }
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px;
+}
+.field { margin-bottom: 20px; }
+label.lbl, .lbl {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+input[type="text"], input[type="email"], select {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+}
+input:focus-visible, select:focus-visible, button:focus-visible, .drop:focus-within {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+}
+input::placeholder { color: #5d6570; }
+
+.drop {
+    display: block;
+    border: 2px dashed var(--line);
+    border-radius: 12px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 14px;
+    transition: border-color .2s, background .2s;
+}
+.drop:hover, .drop.over { border-color: var(--red); background: #e11d2e0d; }
+.drop input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.drop b { color: var(--text); display: block; margin-bottom: 4px; }
+.drop.has b { color: var(--ok); }
+
+input[type="range"] { width: 100%; accent-color: var(--red); }
+.salary-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+#salaryValue { font-weight: 800; font-size: 22px; }
+#salaryNote { color: var(--muted); font-size: 13px; min-height: 20px; margin-top: 4px; }
+
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #c9ced6; margin-bottom: 12px; }
+.check input { accent-color: var(--red); width: 18px; height: 18px; margin-top: 2px; flex: none; }
+
+.actions {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 28px;
+    min-height: 54px;
+}
+.btn {
+    height: 52px;
+    padding: 0 28px;
+    border-radius: 10px;
+    border: none;
+    font: inherit;
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+}
+.btn.send { background: var(--red); color: white; flex: 1; transition: background .2s; }
+.btn.send:hover { background: var(--red-dark); }
+.btn.run {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    transition: transform .25s cubic-bezier(.3, 1.4, .5, 1);
+    white-space: nowrap;
+}
+.hint { font-size: 12px; color: var(--muted); margin-top: 10px; min-height: 18px; }
+.err { color: #f87171; font-size: 13px; margin-top: 6px; min-height: 18px; }
+
+/* Overlay de "análise" */
+.overlay {
+    position: fixed; inset: 0;
+    background: #0a0b0ee6;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    z-index: 10;
+}
+.overlay.on { display: flex; }
+.modal {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 36px 32px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+}
+.modal h2 { font-size: 26px; font-weight: 900; margin-bottom: 12px; }
+.modal p { color: var(--muted); font-size: 15px; }
+.bar { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; margin: 22px 0 14px; }
+.bar i { display: block; height: 100%; width: 0; background: var(--red); transition: width .6s ease; }
+.step { min-height: 24px; font-weight: 600; font-size: 15px; }
+.modal .btn { margin-top: 24px; background: var(--red); color: white; }
+
+@media (max-width: 800px) {
+    .wrap { grid-template-columns: 1fr; gap: 32px; padding-top: 36px; }
+    .card { padding: 24px 18px; }
+}
+@media (max-width: 420px) {
+    .actions { flex-direction: column; align-items: stretch; }
+}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+
+    <section class="intro">
+        <h1>Manda o currículo.<br><em>A gente promete ler.</em><br>(O título, pelo menos.)</h1>
+        <p>Aqui na Drive Motors, todo candidato é analisado com carinho, critério e uma xícara de café já meio frio.</p>
+
+        <ul class="reqs">
+            <li><strong>O que a gente procura</strong></li>
+            <li>5 anos de experiência em algo que existe há 2</li>
+            <li>Pró-atividade, dinamismo e “vestir a camisa” (a camisa é M)</li>
+            <li>Disponibilidade para “ajudar em outras áreas” sem aviso</li>
+            <li>Saber dirigir. Ou fingir muito bem.</li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <form id="form" novalidate>
+
+            <div class="field">
+                <label class="lbl" for="nome">Nome completo</label>
+                <input type="text" id="nome" placeholder="Como está no RG (e não “o brabo do pátio”)">
+            </div>
+
+            <div class="field">
+                <label class="lbl" for="email">E-mail</label>
+                <input type="email" id="email" placeholder="Evite o gatinho_fofo2009@...">
+            </div>
+
+            <div class="field">
+                <label class="lbl" for="vaga">Vaga desejada</label>
+                <select id="vaga">
+                    <option value="">Escolha sua desgraça… digo, vaga</option>
+                    <option>Vendedor(a) de carros</option>
+                    <option>Lavador(a) de carros (exige pós-graduação)</option>
+                    <option>Estagiário(a) (exige 5 anos de experiência)</option>
+                    <option>Gerente (já é o primo do dono)</option>
+                    <option>CEO (vaga ocupada, mas sonhar não custa)</option>
+                    <option>Qualquer uma, eu preciso do emprego</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <div class="salary-row">
+                    <span class="lbl">Pretensão salarial</span>
+                    <span id="salaryValue">R$ 3.000</span>
+                </div>
+                <input type="range" id="salary" min="1500" max="50000" step="500" value="3000" aria-describedby="salaryNote">
+                <div id="salaryNote"></div>
+            </div>
+
+            <div class="field">
+                <span class="lbl">Seu currículo</span>
+                <label class="drop" id="drop">
+                    <input type="file" id="file" accept=".pdf,.doc,.docx">
+                    <b id="dropTitle">Arraste o arquivo ou clique aqui</b>
+                    <span id="dropSub">PDF ou Word. “curriculo_FINAL_v7_agora_vai.pdf” é aceito.</span>
+                </label>
+            </div>
+
+            <label class="check">
+                <input type="checkbox" id="c1">
+                <span>Aceito trabalhar “pela experiência” e “pelo networking”.</span>
+            </label>
+            <label class="check">
+                <input type="checkbox" id="c2">
+                <span>Declaro que meus “conhecimentos avançados em Excel” são verdadeiros (aberto uma vez).</span>
+            </label>
+
+            <div class="err" id="err" role="alert"></div>
+
+            <div class="actions" id="actions">
+                <button type="submit" class="btn send">Enviar currículo</button>
+                <button type="button" class="btn run" id="run">Desistir</button>
+            </div>
+            <div class="hint" id="hint"></div>
+
+        </form>
+    </section>
+
+</main>
+
+<div class="overlay" id="overlay">
+    <div class="modal" id="modal" role="dialog" aria-live="polite"></div>
+</div>
+
+<script>
+// ---------- Pretensão salarial ----------
+const salary = document.getElementById("salary");
+const salaryValue = document.getElementById("salaryValue");
+const salaryNote = document.getElementById("salaryNote");
+
+function formatar(n) {
+    return "R$ " + Number(n).toLocaleString("pt-BR");
+}
+
+function comentarioSalario(n) {
+    if (n <= 2000) return "Você ama trabalhar. Isso é lindo e preocupante.";
+    if (n <= 5000) return "Realista. O RH ficou até emocionado.";
+    if (n <= 15000) return "Ambicioso! O financeiro foi tomar uma água.";
+    if (n <= 30000) return "Você quer ser sócio, por acaso?";
+    return "O dono vai vender o carro dele pra te pagar.";
+}
+
+function atualizarSalario() {
+    salaryValue.textContent = formatar(salary.value);
+    salaryNote.textContent = comentarioSalario(Number(salary.value));
+}
+salary.addEventListener("input", atualizarSalario);
+atualizarSalario();
+
+// ---------- Upload ----------
+const file = document.getElementById("file");
+const drop = document.getElementById("drop");
+const dropTitle = document.getElementById("dropTitle");
+const dropSub = document.getElementById("dropSub");
+
+function mostrarArquivo() {
+    if (file.files.length) {
+        drop.classList.add("has");
+        dropTitle.textContent = file.files[0].name;
+        dropSub.textContent = "Recebido. Vamos fingir que vamos abrir.";
+    }
+}
+file.addEventListener("change", mostrarArquivo);
+["dragenter", "dragover"].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => {
+    if (e.dataTransfer.files.length) {
+        file.files = e.dataTransfer.files;
+        mostrarArquivo();
+    }
+});
+
+// ---------- Botão "Desistir" que foge ----------
+const run = document.getElementById("run");
+const actions = document.getElementById("actions");
+const hint = document.getElementById("hint");
+
+const frases = [
+    "",
+    "Ei, calma lá.",
+    "Desistir? Já?",
+    "Esse botão está com medo de você.",
+    "Nem tenta, ele é rápido.",
+    "Quase pegou. Quase.",
+    "Tá bom, esse aí eu deixo você clicar."
+];
+let fugas = 0;
+const MAX_FUGAS = 6;
+
+function fugir() {
+    if (fugas >= MAX_FUGAS) return;
+    fugas++;
+    const area = actions.getBoundingClientRect();
+    const b = run.getBoundingClientRect();
+    const maxX = Math.max(0, area.width - b.width);
+    const novoX = Math.random() * maxX;
+    const novoY = (Math.random() * 70) - 10;
+    const dx = novoX - (b.left - area.left - (parseFloat(run.dataset.x) || 0));
+    run.dataset.x = dx;
+    run.style.transform = `translate(${dx}px, ${novoY}px)`;
+    hint.textContent = frases[fugas];
+}
+
+run.addEventListener("mouseenter", fugir);
+run.addEventListener("touchstart", e => {
+    if (fugas < MAX_FUGAS) { e.preventDefault(); fugir(); }
+}, { passive: false });
+run.addEventListener("focus", fugir);
+
+run.addEventListener("click", () => {
+    if (fugas < MAX_FUGAS) return;
+    hint.textContent = "Desistiu mesmo? A gente guarda a sua vaga por 0 dias.";
+    run.textContent = "Voltar atrás";
+    run.style.transform = "";
+    fugas = 0;
+});
+
+// ---------- Envio ----------
+const form = document.getElementById("form");
+const err = document.getElementById("err");
+const overlay = document.getElementById("overlay");
+const modal = document.getElementById("modal");
+
+function erro(msg) { err.textContent = msg; }
+
+form.addEventListener("submit", e => {
+    e.preventDefault();
+    erro("");
+
+    const nome = document.getElementById("nome").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const vaga = document.getElementById("vaga").value;
+
+    if (!nome) return erro("Faltou o nome. Nem o RH adivinha.");
+    if (!/^\S+@\S+\.\S+$/.test(email)) return erro("Esse e-mail parece inventado. Confere aí.");
+    if (!vaga) return erro("Escolha uma vaga. Qualquer uma, a gente não julga.");
+    if (!file.files.length) return erro("Cadê o currículo? Enviar vazio é ousado demais.");
+    if (!document.getElementById("c1").checked) return erro("Você precisa aceitar trabalhar pela experiência. É a lei (da empresa).");
+
+    analisar(nome, email, vaga);
+});
+
+const etapas = [
+    "Imprimindo o currículo…",
+    "Perdendo o currículo…",
+    "Achando o currículo debaixo da mesa…",
+    "Lendo só o título e a foto…",
+    "Perguntando pro estagiário o que ele achou…",
+    "Consultando o horóscopo do candidato…"
+];
+
+function analisar(nome, email, vaga) {
+    modal.innerHTML = `
+        <h2>Analisando seu currículo</h2>
+        <p>Equipe de RH em ação (os dois funcionários).</p>
+        <div class="bar"><i id="barra"></i></div>
+        <div class="step" id="etapa"></div>`;
+    overlay.classList.add("on");
+
+    const barra = document.getElementById("barra");
+    const etapa = document.getElementById("etapa");
+    let i = 0;
+
+    function proxima() {
+        if (i >= etapas.length) return resultado(nome, email, vaga);
+        etapa.textContent = etapas[i];
+        barra.style.width = Math.round(((i + 1) / etapas.length) * 100) + "%";
+        i++;
+        setTimeout(proxima, 900);
+    }
+    proxima();
+}
+
+const veredictos = [
+    "Aprovado na primeira fase! (A primeira fase é ter enviado algo.)",
+    "Você foi pré-selecionado para ficar no nosso banco de talentos, ao lado de outros 4.312.",
+    "Perfil muito interessante! Infelizmente buscamos alguém com perfil totalmente diferente.",
+    "Seu currículo foi aprovado pela máquina de café. O RH ainda vai opinar."
+];
+
+function resultado(nome, email, vaga) {
+    // Guarda localmente (sem servidor, só para demonstração)
+    try {
+        const lista = JSON.parse(localStorage.getItem("curriculos") || "[]");
+        lista.push({
+            nome, email, vaga,
+            salario: Number(salary.value),
+            arquivo: file.files[0].name,
+            data: new Date().toISOString()
+        });
+        localStorage.setItem("curriculos", JSON.stringify(lista));
+    } catch (_) {}
+
+    const frase = veredictos[Math.floor(Math.random() * veredictos.length)];
+    const primeiro = nome.split(" ")[0];
+
+    modal.innerHTML = `
+        <h2>Currículo recebido, ${primeiro}!</h2>
+        <p>${frase}</p>
+        <p style="margin-top:14px">Retornamos em até 7 dias úteis. Ou 7 anos. O que vier primeiro.</p>
+        <button class="btn" id="fechar">Beleza, aguardo</button>`;
+
+    document.getElementById("fechar").addEventListener("click", () => {
+        overlay.classList.remove("on");
+        form.reset();
+        drop.classList.remove("has");
+        dropTitle.textContent = "Arraste o arquivo ou clique aqui";
+        dropSub.textContent = "PDF ou Word. “curriculo_FINAL_v7_agora_vai.pdf” é aceito.";
+        salary.value = 3000;
+        atualizarSalario();
+    });
+}
+</script>
+
+</body>
+</html>

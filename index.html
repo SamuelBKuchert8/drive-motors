@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drive Motors</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <a href="index.html"><img src="assets/logo.png" alt="Drive Motors"></a>
+
+        <nav>
+            <a href="#inicio">Início</a>
+            <a href="#estoque">Estoque</a>
+            <a href="#favoritos">Favoritos (<span id="contadorFav">0</span>)</a>
+            <a href="#vender">Vender</a>
+            <a href="#sobre">Concessionária</a>
+            <a href="curriculo.html">Trabalhe conosco</a>
+        </nav>
+
+        <!-- Aparece conforme o usuário estiver logado ou não -->
+        <div class="usuario">
+            <a id="linkEntrar" class="btn" href="login.html">ENTRAR</a>
+            <span id="areaUsuario" class="escondido">
+                Olá, <strong id="nomeUsuario"></strong> |
+                <a href="agendar.html">Agendar</a> |
+                <a href="#" onclick="sair()">Sair</a>
+            </span>
+        </div>
+    </header>
+
+    <section id="inicio" class="hero">
+        <video autoplay muted loop playsinline>
+            <source src="assets/carroav.mp4" type="video/mp4">
+        </video>
+
+        <h1>Encontre o carro<br><span>que combina com você</span></h1>
+        <p>Na Drive Motors você encontra veículos com qualidade, procedência e as melhores condições.</p>
+        <div>
+            <a class="btn" href="#estoque">VER ESTOQUE</a>
+            <button class="btn btn-borda" onclick="irParaAgendamento()">AGENDAR TEST DRIVE</button>
+        </div>
+    </section>
+
+    <!-- Só o administrador enxerga esta parte -->
+    <section id="painelAdmin" class="cinza escondido">
+        <h2 class="titulo">Painel do <span>administrador</span></h2>
+        <p id="resumoAdmin"></p>
+    </section>
+
+    <section id="estoque">
+        <h2 class="titulo">Nosso <span>estoque</span></h2>
+
+        <div class="filtros">
+            <select id="filtroTipo" onchange="filtrar()">
+                <option value="todos">Todos os tipos</option>
+                <option>SUV</option>
+                <option>Sedan</option>
+                <option>Picape</option>
+                <option>Esportivo</option>
+            </select>
+
+            <select id="filtroMarca" onchange="filtrar()">
+                <option value="todas">Todas as marcas</option>
+                <option>Jeep</option>
+                <option>Toyota</option>
+                <option>Ford</option>
+                <option>Honda</option>
+                <option>Tesla</option>
+                <option>Porsche</option>
+                <option>Mercedes-Benz</option>
+            </select>
+        </div>
+
+        <div id="listaCarros" class="lista"></div>
+    </section>
+
+    <section id="favoritos" class="cinza">
+        <h2 class="titulo">Seus <span>favoritos</span></h2>
+        <div id="listaFavoritos" class="lista"></div>
+    </section>
+
+    <section id="vender">
+        <h2 class="titulo">Venda seu <span>veículo</span></h2>
+        <p style="color:#aaa">Preencha os dados e nossa equipe entra em contato com uma avaliação.</p>
+
+        <form id="formVender">
+            <label>Marca</label>
+            <input type="text" id="vMarca" required>
+
+            <label>Modelo</label>
+            <input type="text" id="vModelo" required>
+
+            <label>Ano</label>
+            <input type="number" id="vAno" min="1990" max="2026" required>
+
+            <label>Quilometragem</label>
+            <input type="number" id="vKm" min="0" required>
+
+            <label>Seu nome</label>
+            <input type="text" id="vNome" required>
+
+            <label>WhatsApp</label>
+            <input type="tel" id="vTelefone" placeholder="(54) 99999-9999" required>
+
+            <button class="btn" type="submit">SOLICITAR AVALIAÇÃO</button>
+            <p id="msgVender" class="msg"></p>
+        </form>
+    </section>
+
+    <section id="sobre" class="cinza">
+        <h2 class="titulo">Mais que uma <span>concessionária</span></h2>
+        <p style="color:#bbb; max-width:600px; line-height:1.6">
+            Há mais de 10 anos a Drive Motors acompanha cada etapa da sua compra,
+            do primeiro contato até a entrega das chaves. Trabalhamos com confiança,
+            qualidade e transparência em todas as negociações.
+        </p>
+    </section>
+
+    <footer>
+        <p><strong>DRIVE MOTORS</strong></p>
+        <p>Av. das Nações Unidas, 12345 - São Paulo - SP</p>
+        <p>(11) 99999-9999 | contato@drivemotors.com.br</p>
+        <p><a href="curriculo.html">Trabalhe conosco</a></p>
+        <p>© 2026 Drive Motors. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Janela com os detalhes do carro -->
+    <div id="modal" class="fundo-modal" onclick="fecharModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <img id="modalImg" src="" alt="Carro">
+            <h2 id="modalNome"></h2>
+            <p id="modalInfo" style="color:#aaa; margin-bottom:10px"></p>
+            <p id="modalPreco" class="preco"></p>
+            <button class="btn" onclick="agendarCarro()">AGENDAR TEST DRIVE</button>
+            <button class="btn btn-borda" onclick="fecharModal()">FECHAR</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== Lista de carros (cada carro é um objeto) =====
+        const carros = [
+            { id: 1, nome: "Jeep Compass", marca: "Jeep", tipo: "SUV", ano: 2022, km: 32000, preco: 129900, imagem: "assets/OIP-removebg-preview.png" },
+            { id: 2, nome: "Toyota Corolla", marca: "Toyota", tipo: "Sedan", ano: 2021, km: 28000, preco: 118900, imagem: "assets/toyota.png" },
+            { id: 3, nome: "Ford Ranger", marca: "Ford", tipo: "Picape", ano: 2021, km: 40000, preco: 149900, imagem: "assets/ranger.png" },
+            { id: 4, nome: "Honda Civic", marca: "Honda", tipo: "Sedan", ano: 2020, km: 22000, preco: 114900, imagem: "assets/civic.png" },
+            { id: 5, nome: "Tesla Model 3", marca: "Tesla", tipo: "Sedan", ano: 2023, km: 36000, preco: 219900, imagem: "assets/tesla.png" },
+            { id: 6, nome: "Toyota Land Cruiser", marca: "Toyota", tipo: "SUV", ano: 2022, km: 31000, preco: 421900, imagem: "assets/toyota land cruiser.png" },
+            { id: 7, nome: "Porsche 911 Cabriolet", marca: "Porsche", tipo: "Esportivo", ano: 2021, km: 42000, preco: 816900, imagem: "assets/Porsche 911 Cabriolet.png" },
+            { id: 8, nome: "Mercedes-Benz Classe S", marca: "Mercedes-Benz", tipo: "Sedan", ano: 2022, km: 29000, preco: 608900, imagem: "assets/Mercedes-Benz Classe S.png" }
+        ];
+
+        let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+        let carroAberto = null; // carro que está na janela de detalhes
+
+        function formatarPreco(valor) {
+            return "R$ " + valor.toLocaleString("pt-BR");
+        }
+
+        // Cria o HTML de um carro
+        function criarCard(carro) {
+            let coracao = favoritos.includes(carro.id) ? "♥" : "♡";
+            return `
+                <div class="carro">
+                    <button class="coracao" onclick="favoritar(${carro.id})">${coracao}</button>
+                    <img src="${carro.imagem}" alt="${carro.nome}">
+                    <h3>${carro.nome}</h3>
+                    <p>${carro.tipo} • ${carro.ano} • ${carro.km.toLocaleString("pt-BR")} km</p>
+                    <div class="preco">${formatarPreco(carro.preco)}</div>
+                    <button class="btn" onclick="verDetalhes(${carro.id})">VER DETALHES</button>
+                </div>`;
+        }
+
+        // Mostra os carros do estoque já aplicando os filtros
+        function filtrar() {
+            let tipo = document.getElementById("filtroTipo").value;
+            let marca = document.getElementById("filtroMarca").value;
+
+            let resultado = carros.filter(function (carro) {
+                let tipoOk = (tipo === "todos" || carro.tipo === tipo);
+                let marcaOk = (marca === "todas" || carro.marca === marca);
+                return tipoOk && marcaOk;
+            });
+
+            let html = "";
+            resultado.forEach(function (carro) {
+                html += criarCard(carro);
+            });
+
+            if (resultado.length === 0) {
+                html = "<p class='vazio'>Nenhum veículo encontrado.</p>";
+            }
+            document.getElementById("listaCarros").innerHTML = html;
+        }
+
+        // ===== Favoritos =====
+        function favoritar(id) {
+            if (favoritos.includes(id)) {
+                favoritos = favoritos.filter(function (f) { return f !== id; });
+            } else {
+                favoritos.push(id);
+            }
+            localStorage.setItem("favoritos", JSON.stringify(favoritos));
+            filtrar();
+            mostrarFavoritos();
+        }
+
+        function mostrarFavoritos() {
+            let html = "";
+            carros.forEach(function (carro) {
+                if (favoritos.includes(carro.id)) {
+                    html += criarCard(carro);
+                }
+            });
+            if (html === "") {
+                html = "<p class='vazio'>Você ainda não favoritou nenhum carro.</p>";
+            }
+            document.getElementById("listaFavoritos").innerHTML = html;
+            document.getElementById("contadorFav").textContent = favoritos.length;
+        }
+
+        // ===== Janela de detalhes =====
+        function verDetalhes(id) {
+            carroAberto = carros.find(function (c) { return c.id === id; });
+            document.getElementById("modalImg").src = carroAberto.imagem;
+            document.getElementById("modalNome").textContent = carroAberto.nome;
+            document.getElementById("modalInfo").textContent =
+                carroAberto.tipo + " • " + carroAberto.ano + " • " + carroAberto.km.toLocaleString("pt-BR") + " km";
+            document.getElementById("modalPreco").textContent = formatarPreco(carroAberto.preco);
+            document.getElementById("modal").classList.add("aberto");
+        }
+
+        function fecharModal() {
+            document.getElementById("modal").classList.remove("aberto");
+        }
+
+        function agendarCarro() {
+            irParaAgendamento(carroAberto.nome);
+        }
+
+        // ===== Login =====
+        let usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+        if (usuario) {
+            document.getElementById("linkEntrar").classList.add("escondido");
+            document.getElementById("areaUsuario").classList.remove("escondido");
+            document.getElementById("nomeUsuario").textContent = usuario.nome;
+
+            // Painel só para o administrador
+            if (usuario.tipo === "admin") {
+                let totalUsuarios = (JSON.parse(localStorage.getItem("usuarios")) || []).length;
+                let totalAgend = (JSON.parse(localStorage.getItem("agendamentos")) || []).length;
+                let totalCurr = (JSON.parse(localStorage.getItem("curriculos")) || []).length;
+                let totalAval = (JSON.parse(localStorage.getItem("avaliacoes")) || []).length;
+
+                document.getElementById("painelAdmin").classList.remove("escondido");
+                document.getElementById("resumoAdmin").innerHTML =
+                    "Usuários: " + totalUsuarios + "<br>" +
+                    "Test drives agendados: " + totalAgend + "<br>" +
+                    "Currículos recebidos: " + totalCurr + "<br>" +
+                    "Pedidos de avaliação: " + totalAval;
+            }
+        }
+
+        function sair() {
+            localStorage.removeItem("usuarioLogado");
+            window.location.href = "login.html";
+        }
+
+        // Só agenda se estiver logado
+        function irParaAgendamento(nomeCarro) {
+            if (!usuario) {
+                window.location.href = "login.html";
+            } else if (nomeCarro) {
+                window.location.href = "agendar.html?carro=" + encodeURIComponent(nomeCarro);
+            } else {
+                window.location.href = "agendar.html";
+            }
+        }
+
+        // ===== Vender veículo =====
+        document.getElementById("formVender").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            let pedido = {
+                marca: document.getElementById("vMarca").value,
+                modelo: document.getElementById("vModelo").value,
+                ano: document.getElementById("vAno").value,
+                km: document.getElementById("vKm").value,
+                nome: document.getElementById("vNome").value,
+                telefone: document.getElementById("vTelefone").value
+            };
+
+            let avaliacoes = JSON.parse(localStorage.getItem("avaliacoes")) || [];
+            avaliacoes.push(pedido);
+            localStorage.setItem("avaliacoes", JSON.stringify(avaliacoes));
+
+            let msg = document.getElementById("msgVender");
+            msg.textContent = "Recebemos os dados, " + pedido.nome + "! Entraremos em contato pelo WhatsApp.";
+            msg.className = "msg ok";
+            this.reset();
+        });
+
+        // Quando a página abre
+        filtrar();
+        mostrarFavoritos();
+    </script>
+
+</body>
+</html>
